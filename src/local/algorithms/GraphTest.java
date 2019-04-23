@@ -18,9 +18,9 @@ class GraphTest {
 		
 		result = testGraph.addVertex(1);
 		assertEquals(result, false);
-		//System.out.println("testAddVertex - Graph = ");
-		//testGraph.printGraph();
-		//System.out.println("");
+		System.out.println("testAddVertex - Graph = ");
+		testGraph.printGraph();
+		System.out.println("");
 	}
 	
 	@Test
@@ -39,17 +39,74 @@ class GraphTest {
 		testGraph.addEdge(4,5);
 		testGraph.addEdge(5,6);
 		
-		/*
-		System.out.println("testAddEdge - Graph = ");
-		testGraph.printGraph();
+		assertEquals(testGraph.containsEdge(1,3), true);
+		assertEquals(testGraph.containsEdge(4, 5), true);
+		
+		//System.out.println("testAddEdge - Graph = ");
+		//testGraph.printGraph();
+		//System.out.println("");
+
+		
+	}
+	
+	@Test
+	void testCopyConstructor() {
+		System.out.println("Inside testCopyConstructor...");
+		
+		Graph firstGraph = new Graph();
+		firstGraph.addEdge(1,2);
+		firstGraph.addEdge(1,3);
+		firstGraph.addEdge(1,4);
+		firstGraph.addEdge(2,5);
+		firstGraph.addEdge(2,6);
+		firstGraph.addEdge(2,4);
+		firstGraph.addEdge(3,5);
+		firstGraph.addEdge(4,5);
+		firstGraph.addEdge(5,6);
+		
+		System.out.println("firstGraph = ");
+		firstGraph.printGraph();
 		System.out.println("");
 		
-		System.out.println("Updating Edge List 1,4 to 1,9 ...");
-		testGraph.updateEdgeList(1, 4, 1, 9);
-		testGraph.printGraph();
+		Graph secondGraph = new Graph(firstGraph);
+		System.out.println("secondGraph = ");
+		secondGraph.printGraph();
 		System.out.println("");
-		*/
+		
+		System.out.println("Adding edge 5 1 to secondGraph");
+		secondGraph.addEdge(5, 1);
+		
+		System.out.println("firstGraph = ");
+		firstGraph.printGraph();
+		System.out.println("");
+		
+		System.out.println("secondGraph = ");
+		secondGraph.printGraph();
+		System.out.println("");
+		
+		System.out.println("Removing edge 4 1 from firstGraph");
+		firstGraph.removeEdge(4, 1);
+		
+		System.out.println("firstGraph = ");
+		firstGraph.printGraph();
+		System.out.println("");
+		
+		System.out.println("secondGraph = ");
+		secondGraph.printGraph();
+		System.out.println("");
+		
 	}
+
+	@Test
+	void testContainsEdge(){
+		Graph theGraph = new Graph();
+		
+		theGraph.addEdge(1,2);
+		assertEquals(theGraph.containsEdge(1,2), true);
+		assertEquals(theGraph.containsEdge(2,1), true);
+		assertEquals(theGraph.containsEdge(2,3), false);
+	}
+	
 	
 	/**
 	 * Test minimum cut using test cases from - 
@@ -59,6 +116,7 @@ class GraphTest {
 	/**
 	 * Test Case input_random_1_6 
 	 */
+	/*
 	@Test
 	void testMinCut1_6() {
 		Graph testGraph = new Graph();
@@ -96,8 +154,10 @@ class GraphTest {
 		testGraph.printGraph();
 		System.out.println("");
 		*/
-		
+		/*
 		int result = testGraph.minimumCut();
 		assertEquals(2, result);
 	}
+	*/
+	
 }
