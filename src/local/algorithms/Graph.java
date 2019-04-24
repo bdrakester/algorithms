@@ -2,6 +2,7 @@ package local.algorithms;
 
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Random;
 
 
 
@@ -36,7 +37,7 @@ public class Graph {
 		}
 		
 		/**
-		 * Overrides the equals method. Two edges are considered equal if it connects the same vertices, regardless of order.  
+		 * Overrides the equals method. Two edges are considered equal if they connect the same vertices, regardless of order.  
 		 * That is edge with src = a and dest = b is considered equal and edge with src = b and dest = a. 
 		 * @param o the edge being compared
 		 * @return boolean true if the edges connect the same vertices
@@ -160,7 +161,7 @@ public class Graph {
 			return false;
 		}
 		
-		// Add the vertex with an empty list of adjancecies
+		// Add the vertex with an empty list of adjacent vertices
 		adjacencyList.put(vertex,new ArrayList<Integer>());
 		numVertices++;
 		return true;	
@@ -182,13 +183,12 @@ public class Graph {
 		}
 		
 		// Add the vertices to the adjacency lists
-		adjacencyList.get(src).add(dest);
-		adjacencyList.get(dest).add(src);
-		
+		adjacencyList.get(src).add(dest);	
+		if(src != dest) {
+			adjacencyList.get(dest).add(src);
+		}
 		
 		// Add to the edges list 
-		//int[] vertices = {src,dest};
-		//edges.add(vertices);
 		edges.add(new Edge(src,dest));
 		numEdges++;
 		
@@ -209,7 +209,9 @@ public class Graph {
 		
 		// Remove from the adjacency lists
 		adjacencyList.get(src).remove(Integer.valueOf(dest));
-		adjacencyList.get(dest).remove(Integer.valueOf(src));
+		if (src != dest) {
+			adjacencyList.get(dest).remove(Integer.valueOf(src));
+		}
 		
 		// Remove from the edges list
 		edges.remove(new Edge(src,dest));
@@ -223,23 +225,36 @@ public class Graph {
 	 * @return true if the vertex was removed successfully.
 	 */
 	public boolean removeVertex(int vertex) {
+		// If vertex does not exist
+		if ( !(containsVertex(vertex))) {
+			return false;
+		}
 		
-		return false;
+		// Remove all edges connected to vertex
+		ArrayList<Integer> connectedVertices = new ArrayList<Integer>(adjacencyList.get(vertex));
+		for (int dest : connectedVertices) {
+			removeEdge(vertex,dest);
+		}
+		
+		adjacencyList.remove(vertex);
+		numVertices--;
+		
+		return true;
 	}
 	
 	/**
-	 * Updates and edge in the graph.  
-	 * @param src the original source of the vertex
-	 * @param dest the original destination the vertex 
-	 * @param newSrc the new source of the vertex
-	 * @param newDest the new destination of the vertex
-	 * @return
+	 * Remove edges from that graph that connect a vertex to itself.
 	 */
-	public boolean updateEdge(int src, int dest, int newSrc, int newDest) {
-		return false;
-	}
+	protected void removeSelfLoops() {
+		ArrayList<Edge> workingEdges = new ArrayList<Edge>(edges);
 		
-
+		for(Edge edge : workingEdges) {
+			if (edge.src == edge.dest) {
+				removeEdge(edge.src,edge.dest);
+			}
+		}
+	}
+	
 	/**
 	 * Print the graph
 	 */
@@ -268,101 +283,91 @@ public class Graph {
 	
 	/**
 	 * This method uses the randomized contraction algorithm to find the minimum cut in the graph.
-	 * @return
+	 * It performs the randomized contractions n^2 * ln n times and returns smallest minimum cut. 
+	 * 
+	 * @return the minimum number of cuts.
 	 */
 	public int minimumCut() {
 		/*
+		 * Algorithm:
 		 * While there are more than 2 vertices:
 		 * 		Pick a remaining edge (u,v) uniformly at random
 		 *      Merge (or "contract") u and v into a single vertex
 		 *      remove self-loops
 		 * return cut represented by final 2 vertices
 		 */
-		Graph workingGraph = new Graph(this);
+		 
+		// Do n^2 * ln n trials
+		int numTrials = (numVertices* numVertices) * (int)Math.round(Math.log(numVertices));
+		// Initialize minCuts to numEdges + 1, which minCuts will definitely be smaller than.
+		int minCuts = numEdges + 1;
 		
 		// BEGIN DEBUG
-		
-		workingGraph.contract();
-		System.out.println("Inside minimutCut after contract:");
-		workingGraph.printGraph();
-
+		//System.out.println("minimumCut : numTrials = "  + numTrials);
 		// END DEBUG
 		
-		/*
-		while(workingGraph.getNumVertices() > 2) {
-			workingGraph.contract();
+		for (int i = 0; i < numTrials; i++ ) {
+			// BEGIN DEBUG
+			//System.out.println("\nTrial " + i + " : ");
+			// END DEBUG
+			Graph workingGraph = new Graph(this);
+			
+			while(workingGraph.getNumVertices() > 2) {
+				workingGraph.contract();
+				// BEGIN DEBUG
+				//System.out.println("Inside minimutCut after contract:");
+				//workingGraph.printGraph();
+				// END DEBUG
+			}
+			// BEGIN DEBUG
+			//System.out.println("After contractions - numEdges = " + workingGraph.numEdges);
+			// END DEBUG
+			if (workingGraph.numEdges < minCuts) {
+				minCuts = workingGraph.numEdges;
+			}
 		}
-		*/
-		return workingGraph.getNumEdges();
+		
+		return minCuts;
 		
 	}
 
 	
 	/**
-	 * Performs and edge contraction:   
-	 * 	Pick a remaining edge (u,v) uniformly at random
-	 * 	Merge (or "contract") u and v into a single vertex
-	 * 	Remove self-loops
+	 *  Performs a random edge contraction.   
 	 */
 	private void contract() {
-		// TODO : Redo with better methods such as removeEdge, addEdge, updateEdge
-		int randomEdge, src, dest;
 		
-		// TODO: Pick random integer between 1 and # edges
-		randomEdge = 3; // Picks edge 1 4
-		randomEdge--;
+		/* Algorithm:
+		 *   Pick random edge e connecting u - v
+		 *   Remove edge e
+		 *   For each edge f connecting v - x :
+		 *     Remove edge f
+		 *     Add edge u - x
+		 *   Remove vertex v
+		 *   Remove self loops (every edge u - v where u == v)
+		 */
 		
+		int randomEdge, u, v;
 		
-		// Random edge = src, dest 
-		//src = edges.get(randomEdge)[0];
-		//dest = edges.get(randomEdge)[1];
-		// TODO - fix below to query Edges
-		src = 1;
-		dest = 4;
+		// Pick a random edge
+		randomEdge = (new Random()).nextInt(numEdges);
+		u = edges.get(randomEdge).src;
+		v = edges.get(randomEdge).dest;
 		
-		// BUG TO FIX: Need to update Edges list as well - could do it as I go
-		// or at the end loop through.  Either way - probably want an updateEdgeList (u,v,newU,newV) method.
+		// BEGIN DEBUG
+		//System.out.println("randomEdge = " + randomEdge + " u = " + u + " v = " + v);
+		// END DEBUG
 		
+		removeEdge(u,v);
 		
-		// Remove dest from src adj list
-		adjacencyList.get(src).remove(Integer.valueOf(dest));
-		// Remove src from dest adj list
-		adjacencyList.get(dest).remove(Integer.valueOf(src));
-		// For each vertex v in dest adj list - add new edge src -> v
-		for(int v : adjacencyList.get(dest)) {
-			adjacencyList.get(src).add(v);
-			// Also update edges list src, dest to src, v
-			//updateEdgeList(src, dest, src, v);
+		// For each edge f connecting v to x, remove edge v - x and add edge u - x.
+		ArrayList<Integer> connectedVertices = new ArrayList<Integer>(adjacencyList.get(v));
+		for (int x : connectedVertices) {
+			removeEdge(v,x);
+			addEdge(u,x);
 		}
-		// For each vertex v in adjacency list - if dest exists replace with src
-		for (int v: adjacencyList.keySet()) {
-			while(adjacencyList.get(v).remove(Integer.valueOf(dest))) {
-				adjacencyList.get(v).add(src);
-				// Also update edges list v, dest to v, src
-				//updateEdgeList(v, dest, v, src);
-			}
-		}
-		// Remove dest key from adjacency list
-		adjacencyList.remove(dest);	
-		// remove the random edge from edges list
-		edges.remove(randomEdge);
-		// decrease numEdges, decrease numVertices
-		numEdges--;
-		numVertices--;
-		// remove self loops from adjacency
-		while (adjacencyList.get(src).contains(src)) {
-			adjacencyList.get(src).remove(Integer.valueOf(src));
-		}	
+		removeVertex(v);
 		
-		/*
-		// remove self loops from edges list
-		for (int i = 0; i < edges.size(); i++) {
-			if(edges.get(i)[0] == src && edges.get(i)[1] == src) {
-				edges.remove(i);
-				numEdges--;
-			}
-		}
-		*/
-		
+		removeSelfLoops();
 	}
 }
