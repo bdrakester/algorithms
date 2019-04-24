@@ -291,9 +291,9 @@ public class Graph {
 		/*
 		 * Algorithm:
 		 * While there are more than 2 vertices:
-		 * 		Pick a remaining edge (u,v) uniformly at random
-		 *      Merge (or "contract") u and v into a single vertex
-		 *      remove self-loops
+		 *   Pick a remaining edge (u,v) uniformly at random
+		 *   Merge (or "contract") u and v into a single vertex
+		 *   remove self-loops
 		 * return cut represented by final 2 vertices
 		 */
 		 
