@@ -9,22 +9,36 @@ import edu.princeton.cs.algs4.StdStats;
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
-	
-	private int[][] id;
+	private int n;
+	private int size;
+	private int[] id;
+	private boolean open[];
 	
 	/**
-	 * Constructor - Create an n-by-n grid, with all sites blocked.
+	 * Constructor
 	 * @param n dimension of the square grid, it will be n-by-n. 
 	 */
 	public Percolation(int n) {
-		id = new int[n][n];
-		// Set the id of each object to it self.
-		for(int i = 0; i < n; i++) {
-			for(int j = 0; j < n; j++) {
-				id[i][j] = n*i + j;
-			}
-		}
+		this.n = n;
+		size = n*n;
+		id = new int[size];
+		open = new boolean[size];
 		
+		// Set the id of each object to it self, set open state to false. 
+		for(int i = 0; i < size; i++) {
+			id[i] = i;
+			open[i] = false;
+		}
+	}
+	
+	/**
+	 * Convert 2-D row, col coordinates to an 1-D array index. 
+	 * @param row
+	 * @param col
+	 * @return index in 1-D array
+	 */
+	private int xyTo1D(int row, int col) {
+		return n*row + col;
 	}
 	
 	/**
@@ -33,7 +47,8 @@ public class Percolation {
 	 * @param col
 	 */
 	public void open(int row, int col) {
-		
+		// UF methods: union
+	
 	}
 	
 	/**
@@ -43,6 +58,7 @@ public class Percolation {
 	 * @return true if the site is open
 	 */
 	public boolean isOpen(int row, int col) {
+		// UF methods: 
 		return false;
 	}
 	
@@ -53,6 +69,7 @@ public class Percolation {
 	 * @return true if the site is full.
 	 */
 	public boolean isFull(int row, int col) {
+		// UF Methods: connected
 		return false;
 	}
 	
@@ -69,6 +86,7 @@ public class Percolation {
 	 * @return true if the system percolates.
 	 */
 	public boolean percolates() {
+		// UF methods: connected
 		return false;
 	}
 
