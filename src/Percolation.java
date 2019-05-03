@@ -25,14 +25,26 @@ public class Percolation {
 	 */
 	public Percolation(int n) {
 		this.n = n;
-		size = n*n;
+		size = n*n + 2;
 		sites = new WeightedQuickUnionUF(size);
 		open = new boolean[size];
 		
+		// Set virtual top and bottom sites to open
+		open[0] = true;
+		open[size-1] = true;
 		// Set the open state to false for each site 
-		for(int i = 0; i < size; i++) {
+		for(int i = 1; i < size-1; i++) {
 			open[i] = false;
 		}
+		
+		/*
+		 *  Connect every site in top row to virtual top site and
+		 *  connect every bottom row site to the virtual bottom site.
+		 */
+		for(int i = 1; i <= n; i++) {
+			sites.union(0, i); 
+			sites.union(size-1, xyTo1D(n,i));
+		}	
 	}
 	
 	/**
@@ -43,7 +55,8 @@ public class Percolation {
 	 * @return index in 1-D array
 	 */
 	private int xyTo1D(int row, int col) {
-		return n*(row -1) + (col - 1);
+		int index = n*(row - 1) + col;
+		return index;
 	}
 	
 	/**
@@ -53,9 +66,7 @@ public class Percolation {
 	 * @return true if (row, col) is a valid index
 	 */
 	private boolean validIndices(int row, int col) {
-		int index = xyTo1D(row, col);
-		
-		if (index >= 0 && index < size) {
+		if (row >= 1 && row <= n && col >= 1 && col <= n) {
 			return true;
 		}
 		else {
@@ -70,8 +81,6 @@ public class Percolation {
 	 * @param col
 	 */
 	public void open(int row, int col) {
-		// UF methods: union
-		
 		// Validate the indices
 		if( !validIndices(row,col) ) {
 			throw new IllegalArgumentException("Invalid indices");
@@ -83,7 +92,7 @@ public class Percolation {
 		
 		/* 
 		 * Perform WeightedQuickUnionUF operations that link the site 
-		 * No it's open neighbors: left, right, above, below.		 	
+		 * to it's open neighbors: left, right, above, below.		 	
 		 *   left = row, col-1
 		 *   right = row, col+1
 		 *   above = row-1, col
@@ -115,19 +124,41 @@ public class Percolation {
 	 * @return true if the site is open
 	 */
 	public boolean isOpen(int row, int col) {
+		// Validate the indices
+		if ( !validIndices(row,col) ) {
+			throw new IllegalArgumentException("Invalid indices");
+		}
+		
 		int index = xyTo1D(row,col);
 		
 		return open[index];
 	}
 	
 	/**
-	 * Is site (row, col) full? 
+	 * Is site (row, col) full?  A full site is an open site that can be 
+	 * connected to an open site in the top row via a chain of 
+	 * neighboring open sites.
 	 * @param row
 	 * @param col
 	 * @return true if the site is full.
 	 */
 	public boolean isFull(int row, int col) {
-		// UF Methods: connected
+		// Validate the indices
+		if ( !validIndices(row,col) ) {
+			throw new IllegalArgumentException("Invalid indices");
+		}
+		
+		// If the site is not open, it can't be full
+		if ( !isOpen(row,col) ) {
+			return false;
+		}
+		
+		// If connected to to virtual top site 
+		int site = xyTo1D(row,col);
+		if( sites.connected(site,0) ) {
+			return true;
+		}
+		
 		return false;
 	}
 	
@@ -136,15 +167,26 @@ public class Percolation {
 	 * @return the number of open sites.
 	 */
 	public int numberOfOpenSites() {
-		return 0;
+		int openSites = 0;
+		for (int i = 1; i < size -1; i++) {
+			if (open[i]) {
+				openSites++;
+			}
+		}
+		return openSites;
 	}
 	
 	/**
-	 * Does the system percolate?
+	 * Does the system percolate? A system percolates is there is a full site
+	 * in the bottom row.
 	 * @return true if the system percolates.
 	 */
 	public boolean percolates() {
-		// UF methods: connected
+		//If virtual bottom site is connected to the virtual top site.
+		if (sites.connected(0, size-1)) {
+			return true;
+		}
+		
 		return false;
 	}
 
@@ -157,12 +199,12 @@ public class Percolation {
 		if(debug) {
 			System.out.println("Testing xyTo1D method...");
 			int[][] testCases = {
-					{1,1,0},
-					{5,5,24},
-					{3,2,11},
-					{1,4,3},
-					{2,5,9},
-					{3,1,10}
+					{1,1,1},
+					{5,5,25},
+					{3,2,12},
+					{1,4,4},
+					{2,5,10},
+					{3,1,11}
 			};
 			
 			int result; 
@@ -220,8 +262,70 @@ public class Percolation {
 			testP.open(1,2);
 			boolean connected = testP.sites.connected(testP.xyTo1D(1,1),testP.xyTo1D(1,2));
 			if (connected) {
-				System.out.println("Sites are connected! Passed!");
+				System.out.println("Sites are connected! Passed!\n");
 			}
+			
+			System.out.println("Testing isOpen...");
+			testP.open(2,2);
+			testP.open(3,4);
+			// The first two elements are the index, the third is 1 in it's open, or 0 if not.
+			int[][] testCases2 = {
+					{2,2,1},
+					{3,4,1},
+					{6,6,0},
+					{8,1,0}
+			};
+			boolean result2;
+			numFailures = 0;
+			for (int i = 0; i < testCases2.length; i++) {
+				result2 = testP.isOpen(testCases2[i][0], testCases2[i][1]);
+				System.out.print("Test Case: (" + testCases2[i][0] + ", " + testCases2[i][1] + ") = " + result2);
+				if( (result2 && testCases2[i][2] == 1) || (!result2 && testCases2[i][2] == 0)) {
+					System.out.println(" ... passed!");
+				}
+				else {
+					System.out.println(" ... failed.");
+					numFailures++;
+				}
+			}
+			if(numFailures == 0) {
+				System.out.println("All isOpen tests passed!\n");
+			}
+			else {
+				System.out.println(numFailures + " isOpen tests failed.\n");
+			}
+			
+			System.out.println("Testing isFull...");
+			testP.open(4,4);
+			// The first two elements are the index, the third is 1 in it's open, or 0 if not.
+			int[][] testCases3 = {
+					{2,2,1},
+					{3,4,0},
+					{1,2,1},
+					{8,1,0},
+					{1,2,1},
+					{4,4,0}
+			};
+			numFailures = 0;
+			for (int i = 0; i < testCases3.length; i++) {
+				result2 = testP.isFull(testCases3[i][0], testCases3[i][1]);
+				System.out.print("Test Case: (" + testCases3[i][0] + ", " + testCases3[i][1] + ") = " + result2);
+				if( (result2 && testCases3[i][2] == 1) || (!result2 && testCases3[i][2] == 0)) {
+					System.out.println(" ... passed!");
+				}
+				else {
+					System.out.println(" ... failed.");
+					numFailures++;
+				}
+			}
+			if(numFailures == 0) {
+				System.out.println("All isFull tests passed!\n");
+			}
+			else {
+				System.out.println(numFailures + " isFull tests failed.\n");
+			}
+			
+			
 			
 			
 			
