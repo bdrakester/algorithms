@@ -56,7 +56,7 @@ public class QuickSort
 		
 		// Partition around the pivot element
 		int i = l+1;
-		int temp;
+		//int temp;
 		for (int j = l+1; j <= r; j++) {
 			// If next element smaller than pivot
 			if ( input[j] < pivot ) {

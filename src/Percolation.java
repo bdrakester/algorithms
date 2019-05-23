@@ -1,12 +1,10 @@
 /**
- * The Percolation class estimates the value of the percolation threshold 
- * via Monte Carlo simulation.
+ * The Percolation class models a percolation system.
  *  
  * @author Brian Drake
  * 
  */
-//import edu.princeton.cs.algs4.StdRandom;
-//import edu.princeton.cs.algs4.StdStats;
+
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
@@ -71,8 +69,7 @@ public class Percolation {
 		}
 		else {
 			return false;
-		}
-		
+		}		
 	}
 	
 	/**

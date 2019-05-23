@@ -142,6 +142,7 @@ public class Inversions {
             while(scanner.hasNextInt()){
                 input.add(scanner.nextInt());
             }
+            scanner.close();
             
         } catch (FileNotFoundException ex) {
             System.out.println("Error opening file " + filename);
@@ -155,6 +156,7 @@ public class Inversions {
      * @param input
      * @return int[] An array containing copy of ArrayList
      */
+    /*
     private int[] toIntArray(ArrayList<Integer> input){
         int size = input.size();
         int[] output = new int[size];
@@ -165,6 +167,7 @@ public class Inversions {
         
         return output;
     }
+    */
     
     /**
      * 
