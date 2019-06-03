@@ -2,6 +2,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,6 +75,17 @@ class BruteCollinearPointsTest {
 		}
 	}
 	
+	@Test
+	void test14() {
+		Point[] input = {
+				new Point(29888, 5740),
+				new Point(9362, 27085),
+				new Point(9362, 27085)
+		};
+		assertThrows(IllegalArgumentException.class, () -> new BruteCollinearPoints(input));
+
+		
+	}
 	/*
 	@Test
 	void testBruteCollinearPoints6() {
@@ -88,6 +100,8 @@ class BruteCollinearPointsTest {
 		}
 	}
 	*/
+
+
 
 
 

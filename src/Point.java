@@ -62,7 +62,7 @@ public class Point implements Comparable<Point> {
         
         // If the two points are equal
         if (x == that.x && y == that.y) {
-        	slope = Double.NEGATIVE_INFINITY;
+            slope = Double.NEGATIVE_INFINITY;
         }
         
         // If the line is horizantal 
@@ -76,7 +76,7 @@ public class Point implements Comparable<Point> {
         }
                 
         else {
-        	slope = (double)(that.y - y) / (double)(that.x - x);
+        	slope = (double) (that.y - y) / (double) (that.x - x);
         } 
         
     	return slope;
@@ -95,10 +95,10 @@ public class Point implements Comparable<Point> {
      *         argument point
      */
     public int compareTo(Point that) {
-        if(y < that.y) { return -1; }
-        if(y > that.y) { return 1; }
-        if(x == that.x) { return 0; }
-        if(x < that.x) { return -1; }
+        if (y < that.y) { return -1; }
+        if (y > that.y) { return 1; }
+        if (x == that.x) { return 0; }
+        if (x < that.x) { return -1; }
         else { return 1; }
     }
 

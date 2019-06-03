@@ -14,9 +14,9 @@ import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
 
 public class BruteCollinearPoints {
-	private ArrayList<LineSegment> lineSegments;
-	
-	/**
+    private final ArrayList<LineSegment> lineSegments;
+
+    /**
 	 * Finds all line segments containing 4 points
 	 * @param points
 	 */
@@ -26,35 +26,41 @@ public class BruteCollinearPoints {
 		}
 		
 		lineSegments = new ArrayList<LineSegment>();
+		Point[] sortedPoints = new Point[points.length];
+		
+		
+		for (int i = 0; i < points.length; i++) {
+			if (points[i] == null) {
+				throw new java.lang.IllegalArgumentException("Null point.");
+			}
+			sortedPoints[i] = points[i];
+		}
 		
 		// Sort the points
-		Arrays.sort(points);
+		Arrays.sort(sortedPoints);
 		
 		/* Iterate over every combination of 4 points.
 		 * Throws a java.lang.IllegalArgumentException if any point in the 
-		 * array is null, or if a point was repeated.
+		 * array is a duplicate.
 		 */
-		for (int p = 0; p < points.length - 3; p++) {
-			if (points[p] == null) {
-				throw new java.lang.IllegalArgumentException();
-			}
-			for (int q = p+1; q < points.length - 2; q++) {
-				if (points[q] == null || points[q].compareTo(points[p]) == 0) {
-					throw new java.lang.IllegalArgumentException();
+		for (int p = 0; p < sortedPoints.length - 3; p++) {
+			for (int q = p+1; q < sortedPoints.length - 2; q++) {
+				if (sortedPoints[q].compareTo(sortedPoints[p]) == 0) {
+					throw new java.lang.IllegalArgumentException("Duplicate point.");
 				}
-				for (int r = q+1; r < points.length - 1; r++) {
-					if (points[r] == null || points[r].compareTo(points[q]) == 0) {
-						throw new java.lang.IllegalArgumentException();
+				for (int r = q+1; r < sortedPoints.length - 1; r++) {
+					if (sortedPoints[r].compareTo(sortedPoints[q]) == 0) {
+						throw new java.lang.IllegalArgumentException("Duplicate point.");
 					}
-					for (int s = r+1; s < points.length; s++) {
-						if (points[s] == null || points[s].compareTo(points[r]) == 0) {
-							throw new java.lang.IllegalArgumentException();
+					for (int s = r+1; s < sortedPoints.length; s++) {
+						if (sortedPoints[s].compareTo(sortedPoints[r]) == 0) {
+							throw new java.lang.IllegalArgumentException("Duplicate point.");
 						}
 						// If the points are collinear
-						if (points[p].slopeTo(points[q]) == points[p].slopeTo(points[r])) {
-							if (points[p].slopeTo(points[q]) == points[p].slopeTo(points[s])) {
-								//System.out.println("Adding line (p,q,r,s) = " + points[p] + points[q] + points[r] + points[s]);
-								lineSegments.add(new LineSegment(points[p], points[s]));						
+						if (sortedPoints[p].slopeTo(sortedPoints[q]) == sortedPoints[p].slopeTo(sortedPoints[r])) {
+							if (sortedPoints[p].slopeTo(sortedPoints[q]) == sortedPoints[p].slopeTo(sortedPoints[s])) {
+								// System.out.println("Adding line (p,q,r,s) = " + sortedPoints[p] + sortedPoints[q] + sortedPoints[r] + sortedPoints[s]);
+								lineSegments.add(new LineSegment(sortedPoints[p], sortedPoints[s]));						
 							}
 						}
 					}
