@@ -9,15 +9,14 @@ import java.util.Iterator;
 import edu.princeton.cs.algs4.StdRandom;
 
 public class RandomizedQueue<Item> implements Iterable<Item> {
-	private Item[] queue; // array for storing items in queue
-	int head; // the index of the first item in the queue
-	int tail; // the index after the last item in the queue
-	int size; // number of items in the queue
+    private Item[] queue; // array for storing items in queue
+	private int head; // the index of the first item in the queue
+	private int tail; // the index after the last item in the queue
+	private int size; // number of items in the queue
 	
 	/**
 	 * Construct an empty randomized queue.
 	 */
-	@SuppressWarnings("unchecked")
 	public RandomizedQueue() {
 		queue = (Item[]) new Object[1];
 		head = 0;
@@ -42,12 +41,11 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 		return size;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void resize(int capacity) {
 		Item[] copy = (Item[]) new Object[capacity];
 		
 		int current = head;
-		for(int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++) {
 			copy[i] = queue[current];
 			current = (current + 1) % queue.length;
 		}
@@ -75,7 +73,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 		tail = (tail + 1) % queue.length;
 		
 		// Double the array length if at capacity
-		if(size == queue.length) {
+		if (size == queue.length) {
 			resize(2 * queue.length);
 		}
 		
@@ -87,7 +85,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 	 * @return
 	 */
 	public Item dequeue() {
-		if(isEmpty()) {
+		if (isEmpty()) {
 			throw new java.util.NoSuchElementException("The queue is empty, cannot deque.");
 		}
 		
@@ -118,7 +116,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 	 * @return
 	 */
 	public Item sample() {
-		if(isEmpty()) {
+		if (isEmpty()) {
 			throw new java.util.NoSuchElementException("The queue is empty, cannot sample.");
 		}
 		int rand = (head + StdRandom.uniform(size)) % queue.length;
@@ -139,16 +137,15 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 	 */
 	private class RandomizedQueueIterator implements Iterator<Item> {
 		private int current;
-		private Item[] iteratorQueue;
+		private final Item[] iteratorQueue;
 		
-		@SuppressWarnings("unchecked")
 		public RandomizedQueueIterator() {
 			// Make a copy of the queue, then shuffle  
 			iteratorQueue = (Item[]) new Object[size];
-			int current = head;
-			for(int i = 0; i < size; i++) {
-				iteratorQueue[i] = queue[current];
-				current = (current + 1) % queue.length;
+			int curr = head;
+			for (int i = 0; i < size; i++) {
+				iteratorQueue[i] = queue[curr];
+				curr = (curr + 1) % queue.length;
 			}
 			StdRandom.shuffle(iteratorQueue);
 			current = 0;
@@ -159,7 +156,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 		}
 		
 		public Item next() {
-			if(!hasNext()) {
+			if (!hasNext()) {
 				throw new java.util.NoSuchElementException("No more items to return.");
 			}
 			
@@ -192,4 +189,5 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 		System.out.println("Head = " + head);
 		System.out.println("Tail = " + tail);
 	}
+
 }

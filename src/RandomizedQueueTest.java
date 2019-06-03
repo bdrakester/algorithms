@@ -1,6 +1,6 @@
 import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
+import java.util.Arrays;
 
 class RandomizedQueueTest {
 
@@ -84,7 +84,39 @@ class RandomizedQueueTest {
 		rq.print();
 		System.out.println("");
 		System.out.println("Dequeue a few items");
-		int numDequeue = 2;
+		int numDequeue = 3;
+		while(numDequeue > 0) {
+			System.out.println("dequeue() returned " + rq.dequeue());
+			rq.print();
+			System.out.println("");
+			numDequeue--;
+		}
+		
+		System.out.println("Enqueue more for tail wrap to front of array");
+		while(index < 10) {
+			System.out.println("enqueue(" + input[index] + ")");
+			rq.enqueue(input[index]);
+			rq.print();
+			System.out.println("");
+			index++;
+		}
+		
+		System.out.println("Dequeue/Enqueue more for head wrap to front");
+		numDequeue = 3;
+		while(numDequeue > 0) {
+			System.out.println("dequeue() returned " + rq.dequeue());
+			rq.print();
+			System.out.println("");
+			numDequeue--;
+		}
+		while(index < 13) {
+			System.out.println("enqueue(" + input[index] + ")");
+			rq.enqueue(input[index]);
+			rq.print();
+			System.out.println("");
+			index++;
+		}
+		numDequeue = 4;
 		while(numDequeue > 0) {
 			System.out.println("dequeue() returned " + rq.dequeue());
 			rq.print();
@@ -93,18 +125,41 @@ class RandomizedQueueTest {
 		}
 		
 		
-		
-		
 	}
-	/*
+	
 	@Test
 	void testSample() {
-		fail("Not yet implemented");
+		int[] input = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+		RandomizedQueue<Integer> rq = new RandomizedQueue<>();
+		for(int i : input) {
+			rq.enqueue(i);
+		}
+		
+		boolean result = Arrays.binarySearch(input, rq.sample()) > 0;
+		assertTrue(result);
 	}
 
+	
 	@Test
 	void testIterator() {
-		fail("Not yet implemented");
+		int[] input = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+		int[] output = new int[14];
+		RandomizedQueue<Integer> rq = new RandomizedQueue<>();
+		
+		// Enqueue all the items in the input array
+		for(int i : input) {
+			rq.enqueue(i);
+		}
+		
+		// Dequeue all the items and store in output array
+		int index = 0;
+		for (int item : rq) {
+			output[index] = item;
+			index++;
+		}
+		// Sort the array, should now match input array
+		Arrays.sort(output);
+		assertArrayEquals(input,output);
 	}
-	*/
+	
 }
