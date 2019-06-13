@@ -16,6 +16,19 @@ public class Solver {
 		int moves; // the number moves made to reach the board
 		SearchNode predecessor; // the preceding search node
 		int manhattan;  // the Manhattan priority of the board
+		
+		/**
+		 * Construct a new SearchNode
+		 * @param board the game board
+		 * @param predecessor the preceding search node
+		 * @param moves the number of moves made to reach board
+		 */
+		SearchNode(Board board, Board predecessor, int moves) {
+		    this.board = board;
+		    this.predecessor = predecessor;
+		    this.moves = moves;
+		    this.manhattan = board.manhattan();
+		}
 	}
 	
 	/**
@@ -23,6 +36,21 @@ public class Solver {
 	 * @param initial
 	 */
     public Solver(Board initial) {
+    	queue = new MinPQ<>();
+    	
+    	// Insert inital search node into priority queue
+    	SearchNode initialNode = new SearchNode(initial, null, 0);
+    	queue.insert(initialNode);
+    	Board goalBoard = initial.
+    	
+    	/*
+    	 *  Repeat until the goal board is dequeued
+    	 *   delete from the priority queue the search node with the minimum priority
+    	 *   insert onto the priority queue all neighboring search nodes
+    	 *   
+    	 */
+    	
+    	
     	
     }
     
