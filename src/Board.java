@@ -8,11 +8,11 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.Queue;
 
-
 public class Board {
 	private int[][] tiles; 
 	private int[][] goal; 
-	int n; // dimension of the board
+	private int n; // dimension of the board
+	private Board twin; // twin board 
 	
 	/**
 	 * Construct a board from an n-by-n array of blocks, where 
@@ -36,6 +36,7 @@ public class Board {
     	    }
     	}
     	goal[n-1][n-1] = 0;
+    	twin = null;
     }
     
     /**
@@ -108,7 +109,11 @@ public class Board {
      * @return
      */
     public Board twin() {
-    	Board twin = new Board(tiles);
+    	if (twin != null) {
+    		return twin;
+    	}
+    	
+    	twin = new Board(tiles);
     	// Pick two random tiles (can't be zero)
     	int i1 = StdRandom.uniform(n);
     	int j1 = StdRandom.uniform(n);
@@ -182,7 +187,7 @@ public class Board {
     		}
     	}
     	// DEBUG
-    	System.out.println("neighbors(): - found 0 at " + i0 + "," + j0);
+    	//System.out.println("neighbors(): - found 0 at " + i0 + "," + j0);
     	// END DEBUG
     	
     	/* 
@@ -258,6 +263,7 @@ public class Board {
     	}
     	return s.toString();
     }
+   
 
     /**
      * Main method for testing
@@ -300,9 +306,6 @@ public class Board {
 	    System.out.println("testboard.neighbors():");
 	    for (Board neighbor : testBoard.neighbors()) {
 	    	System.out.println(neighbor.toString());
-	    }
-
-	    
+	    }	    
 	}
-
 }
