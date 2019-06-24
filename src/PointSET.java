@@ -5,6 +5,7 @@
  *
  */
 
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.StdDraw;
@@ -12,8 +13,8 @@ import java.util.TreeSet;
 import java.util.ArrayList;
 
 public class PointSET {
-    private TreeSet<Point2D> points;
-	
+    private final TreeSet<Point2D> points;
+
 	/**
 	 * Construct an empty set of points. 
 	 */
@@ -65,7 +66,7 @@ public class PointSET {
      * Draw all points to standard draw. 
      */
     public void draw() {
-    	for (Point2D point : points ) {
+    	for (Point2D point : points) {
     	    point.draw();
     	}
     }
@@ -108,10 +109,10 @@ public class PointSET {
         double minDist = Double.POSITIVE_INFINITY;
         Point2D nearest = null;
         for (Point2D point : points) {
-            if (point.equals(p)) continue;
-            if (p.distanceTo(point) < minDist) {
+            // if (point.equals(p)) continue;
+            if (p.distanceSquaredTo(point) < minDist) {
                 nearest = point;
-                minDist = p.distanceTo(point);
+                minDist = p.distanceSquaredTo(point);
             }
         }
         
@@ -123,52 +124,29 @@ public class PointSET {
      * @param args
      */
     public static void main(String[] args) {
-        PointSET testSet = new PointSET();
+        // initialize the data structure with points from file
+        String filename = args[0];
+        In in = new In(filename);
+        PointSET brute = new PointSET();
         
-        // Draw all the test points in blue
-        testSet.insert(new Point2D(0.5,0.5));
-        testSet.insert(new Point2D(0.25,0.25));
-        testSet.insert(new Point2D(0.99,0.99));
-        testSet.insert(new Point2D(0.99,0.2));
-        testSet.insert(new Point2D(0.33,0.33));
-        testSet.insert(new Point2D(0.66,0.33));
-	    StdDraw.setPenRadius(0.01);
-	    StdDraw.setPenColor(StdDraw.BLUE);
-	    testSet.draw();
-	    StdDraw.pause(2000);
-	    
-	    // Draw the rectangle in green
-	    RectHV rect = new RectHV(0.2,0.2,0.6,0.6);
-	    StdDraw.setPenColor(StdDraw.GREEN);
-	    rect.draw();
-	    StdDraw.pause(2000);
-	    
-	    // Test the range method by redrawing points returned in green
-	    for (Point2D p : testSet.range(rect)) {
-	        p.draw();
-	    }
-	    StdDraw.pause(4000);
-	    
-	    // Erase the rectangle
-	    StdDraw.setPenColor(StdDraw.WHITE);
-	    rect.draw();
-	    
-	    // Re-draw all test points in blue
-	    StdDraw.setPenColor(StdDraw.BLUE);
-	    testSet.draw();
-	    
-	    // Test nearest method by drawing a new point and nearest in green
-	    StdDraw.setPenColor(StdDraw.GREEN);
-	    Point2D p = new Point2D(0.20,0.25);
-	    p.draw();
-	    StdDraw.pause(2000);
-	    testSet.nearest(p).draw();
-	    StdDraw.pause(2000);
-	    
-	    Point2D p2 = new Point2D(0.68,0.4);
-	    p2.draw();
-	    StdDraw.pause(2000);
-	    testSet.nearest(p2).draw();
+        while (!in.isEmpty()) {
+            double x = in.readDouble();
+            double y = in.readDouble();
+            Point2D p = new Point2D(x, y);
+            brute.insert(p);
+        }
+        StdDraw.clear();
+        StdDraw.setPenColor(StdDraw.BLACK);
+        StdDraw.setPenRadius(0.01);
+        brute.draw();
+        StdDraw.pause(2000);
+        StdDraw.setPenColor(StdDraw.RED);
+        Point2D qp = new Point2D(0.0, 0.25);
+        qp.draw();
+        StdDraw.pause(2000);
+        Point2D qpNear = brute.nearest(qp);
+        qpNear.draw();
+        
 	    
    }
 }
