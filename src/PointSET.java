@@ -111,6 +111,7 @@ public class PointSET {
             if (point.equals(p)) continue;
             if (p.distanceTo(point) < minDist) {
                 nearest = point;
+                minDist = p.distanceTo(point);
             }
         }
         
@@ -124,6 +125,7 @@ public class PointSET {
     public static void main(String[] args) {
         PointSET testSet = new PointSET();
         
+        // Draw all the test points in blue
         testSet.insert(new Point2D(0.5,0.5));
         testSet.insert(new Point2D(0.25,0.25));
         testSet.insert(new Point2D(0.99,0.99));
@@ -132,25 +134,41 @@ public class PointSET {
         testSet.insert(new Point2D(0.66,0.33));
 	    StdDraw.setPenRadius(0.01);
 	    StdDraw.setPenColor(StdDraw.BLUE);
-	    
 	    testSet.draw();
 	    StdDraw.pause(2000);
 	    
+	    // Draw the rectangle in green
 	    RectHV rect = new RectHV(0.2,0.2,0.6,0.6);
 	    StdDraw.setPenColor(StdDraw.GREEN);
 	    rect.draw();
-	    
 	    StdDraw.pause(2000);
+	    
+	    // Test the range method by redrawing points returned in green
 	    for (Point2D p : testSet.range(rect)) {
 	        p.draw();
 	    }
-	    
 	    StdDraw.pause(4000);
 	    
+	    // Erase the rectangle
 	    StdDraw.setPenColor(StdDraw.WHITE);
 	    rect.draw();
+	    
+	    // Re-draw all test points in blue
 	    StdDraw.setPenColor(StdDraw.BLUE);
 	    testSet.draw();
+	    
+	    // Test nearest method by drawing a new point and nearest in green
+	    StdDraw.setPenColor(StdDraw.GREEN);
+	    Point2D p = new Point2D(0.20,0.25);
+	    p.draw();
+	    StdDraw.pause(2000);
+	    testSet.nearest(p).draw();
+	    StdDraw.pause(2000);
+	    
+	    Point2D p2 = new Point2D(0.68,0.4);
+	    p2.draw();
+	    StdDraw.pause(2000);
+	    testSet.nearest(p2).draw();
 	    
    }
 }
