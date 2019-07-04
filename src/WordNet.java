@@ -1,5 +1,5 @@
 /**
- * The WordNet class implements the immutable 
+ * The WordNet class implements the immutable data type WordNet.
  * @author Brian Drake
  *
  */
@@ -39,7 +39,7 @@ public class WordNet {
     }
 
     /**
-     * Distance between nounA and nounB (defined below).
+     * Distance between nounA and nounB.
      * @param nounA
      * @param nounB
      * @return
@@ -53,7 +53,7 @@ public class WordNet {
 
     /**
      * A synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
-     * in a shortest ancestral path (defined below).
+     * in a shortest ancestral path.
      * @param nounA
      * @param nounB
      * @return
