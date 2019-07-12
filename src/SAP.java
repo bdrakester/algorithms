@@ -12,11 +12,12 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 public class SAP {
-    private Digraph digraph;
-    private HashMap<Integer, HashMap<Integer, Integer>> lengths;
-    private HashMap<Integer, HashMap<Integer, Integer>> ancestors;
+    private final Digraph digraph;
+    private final HashMap<Integer, HashMap<Integer, Integer>> lengths;
+    private final HashMap<Integer, HashMap<Integer, Integer>> ancestors;
     
     /**
      * Constructor takes a digraph (not necessarily a DAG)
@@ -119,12 +120,29 @@ public class SAP {
     }
 
     /**
-     * Length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
-     * @param v
-     * @param w
-     * @return
+     * Length of shortest ancestral path between any vertex in v and any 
+     * vertex in w; -1 if no such path.
+     * @param v an iterable of vertices.
+     * @param w an iterable of vertices.
+     * @return the vertex which is the common ancestor in the shortest 
+     *         ancestral path.
      */
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
+        // Throw excepction if argument null or contains a null item
+        if (v == null || w == null) {
+            throw new IllegalArgumentException("Arguments can not be null.");
+        }
+        for (Integer i : v) {
+            if (i == null) {
+                throw new IllegalArgumentException("Arguments can not be null.");    
+            }
+        }
+        for (Integer i : w) {
+            if (i == null) {
+                throw new IllegalArgumentException("Arguments can not be null.");    
+            }
+        }
+        
         int vKey = computeKey(v);
         int wKey = computeKey(w);
         // If not already, compute shortest ancestral path between v and w
@@ -136,12 +154,30 @@ public class SAP {
     }
 
     /**
-     * A common ancestor that participates in shortest ancestral path; -1 if no such path
-     * @param v
-     * @param w
-     * @return
+     * A common ancestor that participates in shortest ancestral path; 
+     * -1 if no such path.
+     * @param v an iterable of vertices.
+     * @param w an iterable of vertices.
+     * @return the vertex which is the common ancestor in the shortest 
+     *         ancestral path. 
      */
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
+        // Throw excepction if argument null or contains a null item
+        if (v == null || w == null) {
+            throw new IllegalArgumentException("Arguments can not be null.");
+        }
+        for (Integer i : v) {
+            if (i == null) {
+                throw new IllegalArgumentException("Arguments can not be null.");    
+            }
+        }
+        for (Integer i : w) {
+            if (i == null) {
+                throw new IllegalArgumentException("Arguments can not be null.");    
+            }
+        }
+        
+        
         int vKey = computeKey(v);
         int wKey = computeKey(w);
         // If not already, computer shortest ancestral path between v and w
@@ -236,6 +272,8 @@ public class SAP {
         
         StdOut.printf("G = %s", G.toString());
         
+        /*
+        // Read in two vertices 
         while (!StdIn.isEmpty()) {
             int v = StdIn.readInt();
             int w = StdIn.readInt();
@@ -243,8 +281,25 @@ public class SAP {
             int ancestor = sap.ancestor(v, w);
             StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
         }
-        
-        // Now read in sets of vertices for testing iterable
+        */
+        // Read in two sets of **n** vertices for testing iterable
+        int n = 3;
+        while (!StdIn.isEmpty()) {
+            ArrayList<Integer> vList = new ArrayList<Integer>();
+            ArrayList<Integer> wList = new ArrayList<Integer>();
+            for (int i = 0; i < n; i++) {
+                vList.add(StdIn.readInt());
+            }
+            for (int i = 0; i < n; i++) {
+                wList.add(StdIn.readInt());
+            }
+            StdOut.printf("vList = %s\n", vList.toString());
+            StdOut.printf("wList = %s\n", wList.toString());
+            int length = sap.length(vList, wList);
+            int ancestor = sap.ancestor(vList, wList);
+            StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+            
+        }
         
         
     }
