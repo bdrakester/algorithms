@@ -12,6 +12,16 @@ import java.awt.Color;
 public class SeamCarver {
     private final Picture picture;
     
+    private class Pixel {
+        int x;
+        int y;
+        
+        public Pixel(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+    
     /**
      * Create a seam carver object based on the given picture. 
      * @param picture the picture to be "seam carved"
@@ -120,12 +130,38 @@ public class SeamCarver {
     }
 
     /**
-     * sequence of indices for vertical seam
-     * @return
+     * Retruns the sequence of indices for vertical seam
+     * @return 
      */
     public int[] findVerticalSeam() {
         // Create 2d array of pixel energies
- 
+        double[][] energy = new double[width()][height()];
+        for (int row = 0; row < height(); row++) {
+            for (int col = 0; col < width(); col++) {
+                energy[col][row] = this.energy(col, row);
+            }
+        }
+        
+        /**
+         *  Consider vertices in topological order
+         *  Relax all edges from that vertex
+         *  IDEA - treat energy as a weighted edge, vertices are lines
+         *        between rows - starting with top line as a source 
+         *        Need to implement getting all edges from each place
+         */
+
+        
+        // Initialize distTo array 
+        double[][] distTo = new double[width()][height()];
+        for (int row = 0; row < height(); row++) {
+            for (int col = 0; col < width(); col++) {
+                distTo[col][row] = Double.POSITIVE_INFINITY; 
+            }
+        }
+        
+        // Initialize edgeTo array
+        Pixel[][] edgeTo = new Pixel[width()][height()];
+                 
         return null;
     }
 
@@ -154,6 +190,7 @@ public class SeamCarver {
         
         SeamCarver sc = new SeamCarver(picture);
         
-        System.out.println(picture.toString());
+        // System.out.println(picture.toString());
+        sc.findVerticalSeam();
     }
 }
