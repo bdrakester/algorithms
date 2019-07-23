@@ -7,10 +7,16 @@
  */
 
 import edu.princeton.cs.algs4.Picture;
+import edu.princeton.cs.algs4.StdOut;
+
 import java.awt.Color;
+import java.util.ArrayList;
 
 public class SeamCarver {
-    private final Picture picture;
+    private Picture picture;
+    private double[][] energy;
+    private double[][] distTo;
+    private Pixel[][] edgeTo;
     
     private class Pixel {
         int x;
@@ -19,6 +25,10 @@ public class SeamCarver {
         public Pixel(int x, int y) {
             this.x = x;
             this.y = y;
+        }
+        
+        public String toString() {
+            return "(" + x + ", " + y + ")";
         }
     }
     
@@ -33,6 +43,7 @@ public class SeamCarver {
         
         // Create a copy of the picture
         this.picture = new Picture(picture);
+        
     }
 
     /**
@@ -115,58 +126,164 @@ public class SeamCarver {
         
         int red = belowPixel.getRed() - abovePixel.getRed();
         int green = belowPixel.getGreen() - abovePixel.getGreen();
-        int blue = belowPixel.getBlue() - belowPixel.getBlue();
+        int blue = belowPixel.getBlue() - abovePixel.getBlue();
         
         return (red * red) + (green * green) + (blue * blue);
         
     }
 
     /**
-     * sequence of indices for horizontal seam
-     * @return
+     * Sequence of indices for horizontal seam.  Tranpose the picture,
+     * call find VerticalSeam() then tranpose it back.
+     * @return an array of length width of the picture such that entry y 
+     *  is the row number of the of the pixel to be removed from column y 
+     *  of the image.
      */
     public int[] findHorizontalSeam() {
-        return null;
+        // Tranpose the picture
+        tranpose();
+        
+        // Find vertical seam in transposed picture
+        int[] path = findVerticalSeam();
+        
+        // Set picture back to original
+        tranpose();
+       
+        return path;
     }
-
+    
     /**
-     * Retruns the sequence of indices for vertical seam
-     * @return 
+     * Tranpose the picture.  Each [col, row] element of the transposed
+     * picture gets the value of the [row, col] element of the original.
+     */
+    private void tranpose() {
+        // Tranpose the picture
+        Picture original = this.picture;
+        this.picture = new Picture(height(), width());
+
+        // Each [col, row] element of the transposed picture gets the value of 
+        // the [row, col] element of the original one.
+        for (int row = 0; row < width(); row++) {
+            for (int col = 0; col < height(); col++) {
+                this.picture.set(row, col, original.get(col, row));    
+            }
+        }       
+    }
+    
+    /**
+     * Retruns the sequence of indices for vertical seam.  
+     * Considers pixels in topological order by starting from top row
+     * moving left to right.
+     * @return an array of length height of the picture such that entry y 
+     *  is the column number of the of the pixel to be removed from row y 
+     *  of the image.
      */
     public int[] findVerticalSeam() {
         // Create 2d array of pixel energies
-        double[][] energy = new double[width()][height()];
+        energy = new double[width()][height()];
         for (int row = 0; row < height(); row++) {
             for (int col = 0; col < width(); col++) {
                 energy[col][row] = this.energy(col, row);
             }
         }
         
-        /**
-         *  Consider vertices in topological order
-         *  Relax all edges from that vertex
-         *  IDEA - treat energy as a weighted edge, vertices are lines
-         *        between rows - starting with top line as a source 
-         *        Need to implement getting all edges from each place
-         */
-
-        
-        // Initialize distTo array 
-        double[][] distTo = new double[width()][height()];
-        for (int row = 0; row < height(); row++) {
+        // Initialize distTo and edgeTo arrays.
+        distTo = new double[width()][height()];
+        edgeTo = new Pixel[width()][height()];
+        for (int col = 0; col < width(); col++) {
+            distTo[col][0] = 1000;
+            edgeTo[col][0] = null;
+        }
+        for (int row = 1; row < height(); row++) {
             for (int col = 0; col < width(); col++) {
                 distTo[col][row] = Double.POSITIVE_INFINITY; 
             }
         }
         
-        // Initialize edgeTo array
-        Pixel[][] edgeTo = new Pixel[width()][height()];
-                 
-        return null;
+        // Consider pixels in topological order
+        for (int row = 0; row < height(); row ++) {
+            for (int col = 0; col < width(); col++) {
+                // Relax each 'edge' to neighboring pixel
+                for (Pixel p : adjacent(col, row)) {
+                    // Relax it
+                    relax(new Pixel(col,row), p);
+                }
+            }
+        }
+        
+        // Find smallest distTo in the last row
+        int lastCol = 0;
+        double shortest = Double.POSITIVE_INFINITY;
+        for (int col = 0; col < width(); col++) {
+            if (distTo[col][height() - 1] < shortest ) {
+                lastCol = col;
+                shortest = distTo[col][height() - 1];
+            }
+        }
+        
+        // Return an array reconcstructed using edgeTo array
+        int[] path = new int[height()];
+        path[height() - 1] = lastCol;
+        for (int row = height() - 2; row >= 0; row--) {
+            path[row] = edgeTo[path[row+1]][row+1].x;    
+        }
+        
+        return path;
     }
-
+    
     /**
-     * remove horizontal seam from current picture
+     * Return the Pixels reachable from the pixel at (x, y) in the Picture.
+     * @param x the x coordinate of the pixel.
+     * @param y the y coordiante of the pixel.
+     * @return an iterable of Pixels reachable from the pixel at (x, y).
+     */
+    private Iterable<Pixel> adjacent(int x, int y) {
+        if (x < 0 || x > width() - 1) {
+            throw new IllegalArgumentException("x argument outside range.");
+        }
+        if (y < 0 || y > height() - 1) {
+            throw new IllegalArgumentException("y argument outside range.");
+        }
+        
+        ArrayList<Pixel> pixels = new ArrayList<>();
+        
+        // If it's the bottom row
+        if (y == height() - 1) {
+            return pixels;
+        }
+  
+ 
+        if (x > 0) {
+            pixels.add(new Pixel(x - 1, y + 1));
+        }
+ 
+        pixels.add(new Pixel(x, y + 1));
+        
+        if (x < width() - 1) {
+            pixels.add(new Pixel(x + 1, y + 1));
+        }
+        
+        return pixels;
+        
+    }
+    
+    /**
+     * Relax the edge from Pixel source to dest. If the current
+     * shortest path to dest is larger than the distance to source
+     * pixel plus dest's energy, update the distTo and edgeTo arrays
+     * with new shortest path.
+     * @param source the source pixel
+     * @param dest the destination pixel
+     */
+    private void relax(Pixel source, Pixel dest) {
+        if (distTo[dest.x][dest.y] > distTo[source.x][source.y] + energy[dest.x][dest.y]) {
+            distTo[dest.x][dest.y] = distTo[source.x][source.y] + energy[dest.x][dest.y];
+            edgeTo[dest.x][dest.y] = source;
+        }
+    }
+    
+    /**
+     * Remove horizontal seam from current picture. 
      * @param seam
      */
     public void removeHorizontalSeam(int[] seam) {
@@ -190,7 +307,22 @@ public class SeamCarver {
         
         SeamCarver sc = new SeamCarver(picture);
         
-        // System.out.println(picture.toString());
+        System.out.println(picture.toString());
+        //sc.findVerticalSeam();
+        
+        System.out.println("\nTesting adjacent method...\n");
+        
+        for (int row = 0; row < sc.height(); row++) {
+            for (int col = 0; col < sc.width(); col++) {
+                System.out.print("(" + col + ", " + row + ").adjacent = ");
+                for (Pixel p : sc.adjacent(col, row)) {
+                    System.out.print(p.toString() + " ");
+                }
+                System.out.println();
+            }
+        }
+        
         sc.findVerticalSeam();
+        
     }
 }
