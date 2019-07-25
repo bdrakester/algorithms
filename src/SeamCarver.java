@@ -50,7 +50,7 @@ public class SeamCarver {
      * @return the current picture.
      */
     public Picture picture() {
-        return picture;
+        return new Picture(picture);
         
     }
 
@@ -88,8 +88,8 @@ public class SeamCarver {
             return 1000;
         }
         
-        int xGrad = xGradientSquared(x,y);
-        int yGrad = yGradientSquared(x,y);
+        int xGrad = xGradientSquared(x, y);
+        int yGrad = yGradientSquared(x, y);
         
         return Math.sqrt((double) (xGrad + yGrad));
     }
@@ -200,12 +200,12 @@ public class SeamCarver {
         }
         
         // Consider pixels in topological order
-        for (int row = 0; row < height(); row ++) {
+        for (int row = 0; row < height(); row++) {
             for (int col = 0; col < width(); col++) {
                 // Relax each 'edge' to neighboring pixel
                 for (Pixel p : adjacent(col, row)) {
                     // Relax it
-                    relax(new Pixel(col,row), p);
+                    relax(new Pixel(col, row), p);
                 }
             }
         }
@@ -214,7 +214,7 @@ public class SeamCarver {
         int lastCol = 0;
         double shortest = Double.POSITIVE_INFINITY;
         for (int col = 0; col < width(); col++) {
-            if (distTo[col][height() - 1] < shortest ) {
+            if (distTo[col][height() - 1] < shortest) {
                 lastCol = col;
                 shortest = distTo[col][height() - 1];
             }
@@ -282,12 +282,43 @@ public class SeamCarver {
     }
     
     /**
+     * Return true if passed a valid seam, else return false.  A seam is valid
+     * if all adjacent entries differ by at most 1. 
+     * @param seam an integer array representing a seam.
+     * @return true if seam is valid, else false. 
+     */
+    private boolean validSeam(int[] seam) {
+        for (int i = 1; i < seam.length - 1; i++) {
+            if (Math.abs(seam[i] - seam[i-1]) > 1 || Math.abs(seam[i] - seam[i+1]) > 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
      * Remove horizontal seam from current picture. 
      * @param seam n array of length width of the picture such that entry y 
      *  is the row number of the of the pixel to be removed from column y 
      *  of the image.
      */
     public void removeHorizontalSeam(int[] seam) {
+        if (seam == null) {
+            throw new IllegalArgumentException("Argument can not be null.");
+        }
+        
+        if (height() < 1) {
+            throw new IllegalArgumentException("Picture height is less than 1.");
+        }
+        
+        if (seam.length != width()) {
+            throw new IllegalArgumentException("Array length must be picture width.");
+        }
+        
+        if (!validSeam(seam)) {
+            throw new IllegalArgumentException("Argument not a valid seam.");
+        }
+        
         // Create a new picture with same width and height minus 1 pixel.
         Picture newPicture = new Picture(width(), height() - 1);
         
@@ -295,11 +326,13 @@ public class SeamCarver {
         for (int col = 0; col < width(); col++) {
             // For each row before the seam
             for (int row = 0; row < seam[col]; row++) {
-                newPicture.set(col, row, picture.get(col, row));
+                newPicture.setRGB(col, row, picture.getRGB(col, row));
+                // newPicture.set(col, row, picture.get(col, row));
             }
             // For each row after the seam
             for (int row = seam[col]; row < newPicture.height(); row++) {
-                newPicture.set(col, row, picture.get(col, row+1));
+                newPicture.setRGB(col, row, picture.getRGB(col, row+1));
+                // newPicture.set(col, row, picture.get(col, row+1));
             }
         }
         
@@ -313,26 +346,45 @@ public class SeamCarver {
      *  of the image. 
      */
     public void removeVerticalSeam(int[] seam) {
+        if (seam == null) {
+            throw new IllegalArgumentException("Argument can not be null.");
+        }
+        
+        if (width() <= 1) {
+            throw new IllegalArgumentException("Picture width is less than 1.");
+        }
+        
+        if (seam.length != height()) {
+            throw new IllegalArgumentException("Array length must be height of array.");
+        }
+        
+        if (!validSeam(seam)) {
+            throw new IllegalArgumentException("Argument not a valid seam.");
+        }
+        
         // Create a new picture with same height and width minus 1 pixel.
         Picture newPicture = new Picture(width() - 1, height());
         
         // Iterate over each row copying pixels to new picture
         for (int row = 0; row < height(); row++) {
             // For each column before the seam
-            for(int col = 0; col < seam[row]; col++) {
-                newPicture.set(col, row, picture.get(col, row));
+            for (int col = 0; col < seam[row]; col++) {
+                newPicture.setRGB(col, row, picture.getRGB(col, row));
+                // newPicture.set(col, row, picture.get(col, row));
             }
             // For each column after the seam
             for (int col = seam[row]; col < newPicture.width(); col++) {
-                newPicture.set(col, row, picture.get(col+1, row));
+                newPicture.setRGB(col, row, picture.getRGB(col+1, row));
+                // newPicture.set(col, row, picture.get(col+1, row));
             }
         }
         picture = newPicture;
     }
+    
 
     /**
-     * unit testing (optional)
-     * @param args
+     * Unit testing.
+     * @param args command line arguments.
      */
     public static void main(String[] args) {
         Picture picture = new Picture(args[0]);
@@ -340,7 +392,7 @@ public class SeamCarver {
         SeamCarver sc = new SeamCarver(picture);
         
         System.out.println(picture.toString());
-        //sc.findVerticalSeam();
+        // sc.findVerticalSeam();
         
         System.out.println("\nTesting adjacent method...\n");
         
