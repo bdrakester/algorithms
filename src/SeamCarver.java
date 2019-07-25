@@ -7,7 +7,6 @@
  */
 
 import edu.princeton.cs.algs4.Picture;
-import edu.princeton.cs.algs4.StdOut;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -235,7 +234,7 @@ public class SeamCarver {
      * Return the Pixels reachable from the pixel at (x, y) in the Picture.
      * @param x the x coordinate of the pixel.
      * @param y the y coordiante of the pixel.
-     * @return an iterable of Pixels reachable from the pixel at (x, y).
+     * @return an iterable of Pixels reachable from the pixel at (x, y). 
      */
     private Iterable<Pixel> adjacent(int x, int y) {
         if (x < 0 || x > width() - 1) {
@@ -284,18 +283,51 @@ public class SeamCarver {
     
     /**
      * Remove horizontal seam from current picture. 
-     * @param seam
+     * @param seam n array of length width of the picture such that entry y 
+     *  is the row number of the of the pixel to be removed from column y 
+     *  of the image.
      */
     public void removeHorizontalSeam(int[] seam) {
+        // Create a new picture with same width and height minus 1 pixel.
+        Picture newPicture = new Picture(width(), height() - 1);
         
+        // Iterate over each column copying pixels to the new picture
+        for (int col = 0; col < width(); col++) {
+            // For each row before the seam
+            for (int row = 0; row < seam[col]; row++) {
+                newPicture.set(col, row, picture.get(col, row));
+            }
+            // For each row after the seam
+            for (int row = seam[col]; row < newPicture.height(); row++) {
+                newPicture.set(col, row, picture.get(col, row+1));
+            }
+        }
+        
+        picture = newPicture;
     }
 
     /**
-     * remove vertical seam from current picture
-     * @param seam
+     * Remove a vertical seam from current picture.
+     * @param seam an array of length height of the picture such that entry y 
+     *  is the column number of the of the pixel to be removed from row y 
+     *  of the image. 
      */
     public void removeVerticalSeam(int[] seam) {
+        // Create a new picture with same height and width minus 1 pixel.
+        Picture newPicture = new Picture(width() - 1, height());
         
+        // Iterate over each row copying pixels to new picture
+        for (int row = 0; row < height(); row++) {
+            // For each column before the seam
+            for(int col = 0; col < seam[row]; col++) {
+                newPicture.set(col, row, picture.get(col, row));
+            }
+            // For each column after the seam
+            for (int col = seam[row]; col < newPicture.width(); col++) {
+                newPicture.set(col, row, picture.get(col+1, row));
+            }
+        }
+        picture = newPicture;
     }
 
     /**
