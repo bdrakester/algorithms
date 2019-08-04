@@ -6,15 +6,21 @@
  */
 
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.FlowNetwork;
+import edu.princeton.cs.algs4.FlowEdge;
+import edu.princeton.cs.algs4.FordFulkerson;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 public class BaseballElimination {
     private final int numTeams;
-    private final HashMap<String,Integer> teams;
+    private final HashMap<String, Integer> teams;
     private final int[] wins;
     private final int[] losses;
     private final int[] remaining;
     private final int[][] gamesLeft;
+    private final ArrayList<ArrayList<String>> eliminators;
+    private final boolean[] eliminated;
     
     /** 
      * Create a baseball division from given filename containing the 
@@ -24,13 +30,23 @@ public class BaseballElimination {
     public BaseballElimination(String filename) {                    
         In file = new In(filename);
         
+        // Read the number to teams from file
         numTeams = file.readInt();
+        
+        // Initialize instance variables
         teams = new HashMap<>();
         wins = new int[numTeams];
         losses = new int[numTeams];
         remaining = new int[numTeams];
         gamesLeft = new int[numTeams][numTeams];
+        eliminators = new ArrayList<>(numTeams);
+        eliminated = new boolean[numTeams];
+        for (int i = 0; i < numTeams; i++) {
+            eliminators.add(i, new ArrayList<>());
+            eliminated[i] = false;
+        }
         
+                
         for (int i = 0; i < numTeams; i++) {
             teams.put(file.readString(), i);
             wins[i] = file.readInt();
@@ -38,6 +54,16 @@ public class BaseballElimination {
             remaining[i] = file.readInt();
             for (int j = 0; j < numTeams; j++) {
                 gamesLeft[i][j] = file.readInt();
+            }
+        }
+        
+        // Determine if each team is eliminated
+        for (String team : teams()) {
+            if (isTrivialEliminated(team)) {
+                eliminated[teams.get(team)] = true;    
+            }
+            else if (isNonTrivialEliminated(team)) {
+                eliminated[teams.get(team)] = true;
             }
         }
     }
@@ -48,7 +74,6 @@ public class BaseballElimination {
      */
     public int numberOfTeams() {
         return numTeams;
-        
     }
     
     /**
@@ -61,41 +86,57 @@ public class BaseballElimination {
     }
     
     /**
-     * Number of wins for given team
-     * @param team
-     * @return
+     * Number of wins for given team.
+     * @param team the name of the team.
+     * @return the team's number of wins.
      */
     public int wins(String team) {
-        return 0;
+        if (!teams.containsKey(team)) {
+            throw new IllegalArgumentException("Team does not exist.");
+        }
+        
+        return wins[teams.get(team)];
     }
     
     /**
-     * Number of losses for given team
-     * @param team
-     * @return
+     * Number of losses for given team.
+     * @param team the name of the team.
+     * @return the team's number of losses.
      */
     public int losses(String team) {
-        return 0;    
+        if (!teams.containsKey(team)) {
+            throw new IllegalArgumentException("Team does not exist.");
+        }
+        
+        return losses[teams.get(team)];    
     }
     
     /**
-     * Number of remaining games for given team
-     * @param team
-     * @return
+     * Number of remaining games for given team.
+     * @param team the name of the team.
+     * @return the team's number of remaining games.
      */
     public int remaining(String team) {
-        return 0;
+        if (!teams.containsKey(team)) {
+            throw new IllegalArgumentException("Team does not exist.");
+        }
+        
+        return remaining[teams.get(team)];
         
     }
     
     /**
-     * Number of remaining games between team1 and team2
-     * @param team1
-     * @param team2
-     * @return
+     * Number of remaining games between team1 and team2.
+     * @param team1 the name of the first team.
+     * @param team2 the name of the second team.
+     * @return the number of games remaining between team1 and team2.
      */
     public int against(String team1, String team2) {
-       return 0;
+        if (!teams.containsKey(team1) || !teams.containsKey(team2)) {
+            throw new IllegalArgumentException("Team does not exist.");
+        }
+        
+       return gamesLeft[teams.get(team1)][teams.get(team2)];
     }
     
     /**
@@ -104,16 +145,123 @@ public class BaseballElimination {
      * @return
      */
     public boolean isEliminated(String team) {
-        return false;
+        if (!teams.containsKey(team)) {
+            throw new IllegalArgumentException("Team does not exist.");
+        }
+        
+        return eliminated[teams.get(team)];
     }
     
     /**
-     * Subset R of teams that eliminates given team; null if not eliminated
-     * @param team
-     * @return
+     * If the team is trivially eliminated return true, else return false.
+     * A team is trivially eliminated if the maximum number of games the 
+     * team can win is less than the number of wins of another team.
+     * @param team the name of the team.
+     * @return true if team is trivially elimnated, else false.
+     */
+    private boolean isTrivialEliminated(String team) {
+        int maxWins = wins[teams.get(team)] + remaining[teams.get(team)];
+        
+        for (String t : teams()) {
+            if (maxWins < wins(t)) {
+                eliminators.get(teams.get(team)).add(t);               
+            }
+        }
+        
+        if (eliminators.get(teams.get(team)).isEmpty()) return false;
+        else return true;
+    }
+    
+    /**
+     * If the team is nontrivially eliminated return true, else return false.
+     * The method models the problem as a flow network and solve the max flow
+     * problem in it.
+     * @param team the name of the team.
+     * @return true if team is nontrivially eliminated, else false.
+     */
+    private boolean isNonTrivialEliminated(String team) {
+        int combinations = factorial(numTeams-1) / (2 * factorial(numTeams - 3));
+        int V = combinations + numTeams + 1;
+        double totalGamesLeft = 0;
+        
+        // BEGIN DEBUG
+        // System.out.println("isNonTrivial(" + team + ") ...");
+        // System.out.println("combinations = " + combinations);
+        // System.out.println("V = " + V);
+        // END DEBUG
+        
+        FlowNetwork network = new FlowNetwork(V);
+
+        int w = 1;
+        int incI = 0;
+        int incJ = 0;
+        for (int i = 0; i < numTeams - 2; i++) {
+            if (i == teams.get(team)) incI = 1;
+            for (int j = i + 1; j < numTeams - 1; j++) {
+                if (j == teams.get(team)) incJ = 1;
+                network.addEdge(new FlowEdge(0, w, (double) gamesLeft[i + incI][j + incJ]));
+                totalGamesLeft += (double) gamesLeft[i + incI][j + incJ];
+                network.addEdge(new FlowEdge(w, combinations + 1 + i, Double.POSITIVE_INFINITY));
+                network.addEdge(new FlowEdge(w, combinations + 1 + j, Double.POSITIVE_INFINITY));
+                w++;
+            }
+        }
+        
+        incI = 0;
+        int maxWins = wins[teams.get(team)] + remaining[teams.get(team)];
+        for (int i = 0; i < numTeams - 1; i++) {
+            if (i == teams.get(team)) incI = 1;
+            network.addEdge(new FlowEdge(combinations + 1 + i, V-1, maxWins - wins[i + incI]));
+        }
+
+        // BEGIN DEBUG
+        // System.out.println("network = " + network.toString());
+        // END DEBUG
+        
+        FordFulkerson ff = new FordFulkerson(network, 0, V - 1);
+        
+        // BEGIN DEBUG
+        // System.out.println("totalGamesLeft = " + totalGamesLeft);
+        // System.out.println("maxflow = " + ff.value());
+        // END DEBUG
+        
+        if (ff.value() == totalGamesLeft) return false;
+        else {
+            for (String t : teams()) {
+                if (t.equals(team)) continue;
+                if (ff.inCut(combinations + 1 + teams.get(t))) {
+                    eliminators.get(teams.get(team)).add(t);
+                }
+            }
+            return true;
+        }
+    }
+    
+    /**
+     * Calculates the factorial of a number. 
+     * @param n the number
+     * @return the factorial of n
+     */
+    private int factorial(int n) {
+        int result = n;
+        for (int i = n-1; i > 1; i--) {
+            result = result * i;
+        }
+        return result;
+    }
+    
+    /**
+     * Subset R of teams that eliminates given team; null if not eliminated.
+     * @param team the name of the team.
+     * @return an iterable of team names that eliminate team.
      */
     public Iterable<String> certificateOfElimination(String team) {
-        return null;
+        if (!teams.containsKey(team)) {
+            throw new IllegalArgumentException("Team does not exist.");
+        }
+        
+        if (eliminators.get(teams.get(team)).isEmpty()) return null;
+        else return eliminators.get(teams.get(team));
     }
 
     /**
@@ -124,6 +272,18 @@ public class BaseballElimination {
         BaseballElimination division = new BaseballElimination(args[0]);
         
         System.out.println("division.numberOfTeams() = " + division.numberOfTeams());
+        
+        for (String team : division.teams()) {
+            System.out.println("division.wins(" + team + ") = " + division.wins(team));
+            System.out.println("division.losses(" + team + ") = " + division.losses(team));
+            System.out.println("division.reamaining(" + team + ") = " + division.remaining(team));
+        }
+        
+        for (String team1 : division.teams()) {
+            for (String team2 : division.teams()) {
+                System.out.println("division.against(" + team1 + ", " + team2 + ") = " + division.against(team1, team2));
+            }
+        }
         
         for (String team : division.teams()) {
             if (division.isEliminated(team)) {
