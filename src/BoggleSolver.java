@@ -8,18 +8,20 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.TrieST;
+// import edu.princeton.cs.algs4.TrieST;
+import edu.princeton.cs.algs4.TST;
 
 
 public class BoggleSolver {
-    private final TrieST<Integer> dictionary;
+    // private final TrieST<Integer> dictionary;
+	private final TST<Integer> dictionary;
     private int rows;
     private int cols;
-    // private boolean[][] marked;
-    // private Die[] edgeTo;
-    ArrayList<String> validWords;
+    private boolean[][] marked;
+    private BoggleBoard board;
+    private HashSet<String> validWords;
     
-    private class Die {
+    private static class Die {
         int row;
         int col;
         
@@ -40,23 +42,15 @@ public class BoggleSolver {
      * @param dictionary
      */
     public BoggleSolver(String[] dictionary) {
-        this.dictionary = new TrieST<>();
+        // this.dictionary = new TrieST<>();
+    	this.dictionary = new TST<>();
         
         for (String word : dictionary) {
             this.dictionary.put(word, word.length());
         }
     }
 
-    /**
-     * Use DFS to enumerate all possible strings on the board
-     */
-    private void searchBoard() {
-        /* Start at v = 0,0 
-         * Mark v as visited
-         * Recursively visit all w adjacent to v
-         */ 
-        
-    }
+
     
     /**
      * Return all the Die reacheble from a Die at row, col.
@@ -114,50 +108,67 @@ public class BoggleSolver {
     public Iterable<String> getAllValidWords(BoggleBoard board) {
        rows = board.rows();
        cols = board.cols();
-       ArrayList<String> possible = new ArrayList<>();
+       this.board = board;
+       marked = new boolean[rows][cols];
+       validWords = new HashSet<>();
        
-       // TODO - Instead of DFS - do a similar search but using a List of die already 
-       // visited instead ... also helps build the words ... start with first search, 
-       // then how woudl the rest go ...
-       
+       // Using each die as a starting point, use DFS to traverse the 
+       // board and generate all potential words.
        for (int i = 0; i < rows; i++) {
            for (int j = 0; j < cols; j++) {
-               // BEGIN DEBUG
-               System.out.println("Starting Die = (" + i + ", " + j + "):");
-               // END DEBUG
-               ArrayList<Die> path = new ArrayList<>();
-               searchBoard(path, new Die(i,j), board);
-               
-               
+        	   char first = this.board.getLetter(i, j);
+        	   if (first == 'Q') {
+        		   searchBoard(i, j, "QU");
+        	   }
+        	   else {
+        		   searchBoard(i, j, String.valueOf(this.board.getLetter(i, j)));
+        	   }
            }
        }
+       
        return validWords; 
     }
     
-    private void searchBoard(int row, int col, String current, BoggleBoard board) {
-        System.out.println("searchBoard: current = " + current);
-        for (Die die : adjacent(row, col)) {
-            searchBoard(die.row, die.col, current + board.getLetter(row, col), board);
-        }
-    }
-    
     /**
-     * Perform depth first search on the board starting from row, col
-     * @param board the BoggleBoard
-     * @param row 
-     * @param col
-     * @param marked
+     * Use DFS to enumerate all potential words on the board, starting at row, col
+     * @param row the row of the starting die
+     * @param col the column of the starting die
+     * @param path the potential word generated so far
      */
-    private void depthFirstSearch(BoggleBoard board, int row, int col, boolean[][] marked) {
-        // BEGIN DEBUG
-        System.out.println("dfs (" + row + ", " + col + ") " + marked.toString());
-        // END DEBUG
-        marked[row][col] = true;
-        for (Die die : adjacent(row, col)) {
-            if (!marked[die.row][die.col]) {
-                depthFirstSearch(board, die.row, die.col, marked);
-            }
-        }
+    private void searchBoard(int row, int col, String path) {
+    	// BEGIN DEBUG
+    	// System.out.print("Inside searchBoard ... ");
+    	// System.out.print("row = " + row);
+    	// System.out.print(" col = " + col);
+    	// System.out.println(" path = " + path);
+    	// END DEBUG
+    	
+    	// If it's a valid word.
+    	if (path.length() > 2 && dictionary.contains(path)) {
+    		validWords.add(path);
+    	}
+    	
+    	// If the path so far is a prefix to a word in the dictionary
+    	if (dictionary.keysWithPrefix(path).iterator().hasNext()) {
+    		// 	Mark the die at (row, col) as visited
+    		marked[row][col] = true;
+    	
+    		// Recursively visit all unvisited adjacent dice
+    		for (Die die : adjacent(row, col)) {
+    			if (!marked[die.row][die.col]) {
+    				char next = board.getLetter(die.row, die.col);
+    				if (next == 'Q') {
+    					searchBoard(die.row, die.col, path + next + 'U');
+    				}
+    				else {
+    					searchBoard(die.row, die.col, path + next);
+    				}
+    			}
+    		}
+    	
+    		// Unmark the die as visited before returning
+    		marked[row][col] = false;
+    	}
     }
     
     /**
@@ -167,7 +178,6 @@ public class BoggleSolver {
      * @param word
      * @return
      */
-
     public int scoreOf(String word) {
         if (inDictionary(word) && word.length() > 2) {
             if (word.length() < 5) { return 1; }
@@ -187,6 +197,7 @@ public class BoggleSolver {
     private boolean inDictionary(String word) {
         return dictionary.contains(word);
     }
+    
     /**
      * Unit tests.
      * @param args
@@ -198,12 +209,24 @@ public class BoggleSolver {
         BoggleBoard board = new BoggleBoard(args[1]);
         int score = 0;
         
-        
+        /*
         String[] testWords = {"HELP", "MOM", "TACO", "MONKEYS"};
         for (String word : testWords) {
             System.out.println("solver.inDictionary(" + word + ") = " + solver.inDictionary(word));
         }
         
+        String[] testPrefix = {"MONKEYS", "MONKEY", "MONK", "MONKA"};
+        for (String prefix : testPrefix) {
+        	System.out.print("solver.dictionary.keysWithPrefix(" + prefix + ") = ");
+        	if(!solver.dictionary.keysWithPrefix(prefix).iterator().hasNext()) {
+        		System.out.println("no prefix matches");
+        	}
+        	else {
+        		System.out.println(solver.dictionary.keysWithPrefix(prefix));
+        	}
+        	
+        }
+        */
         // Get familiar with BoggleBoard class
         // System.out.println("board = \n" + board.toString());
         /*
@@ -215,19 +238,14 @@ public class BoggleSolver {
                 System.out.println("board.getLetter(" + i + ", " + j + ") = " + board.getLetter(i, j));
             }
         }
-        */
-                
-    
+        */      
+        
         for (String word : solver.getAllValidWords(board)) {
             System.out.println(word);
             score += solver.scoreOf(word);
         }
-       
         System.out.println("\nScore = " + score);
         
         // solver.getAllValidWords(new BoggleBoard(5,5));
-
-
     }
-
 }
