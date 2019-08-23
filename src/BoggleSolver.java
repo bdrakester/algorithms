@@ -8,13 +8,12 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 import edu.princeton.cs.algs4.In;
-// import edu.princeton.cs.algs4.TrieST;
 import edu.princeton.cs.algs4.TST;
 
 
 public class BoggleSolver {
-    // private final TrieST<Integer> dictionary;
-	private final TST<Integer> dictionary;
+    // private final TST<Integer> dictionary;
+    private final BoggleDictionary dictionary;
     private int rows;
     private int cols;
     private boolean[][] marked;
@@ -35,6 +34,7 @@ public class BoggleSolver {
         }
         
     }
+
     /**
      * Initializes the data structure using the given array of strings as the
      * dictionary. (You can assume each word in the dictionary contains only 
@@ -42,15 +42,15 @@ public class BoggleSolver {
      * @param dictionary
      */
     public BoggleSolver(String[] dictionary) {
-        // this.dictionary = new TrieST<>();
-    	this.dictionary = new TST<>();
+    	// this.dictionary = new TST<>();
+    	this.dictionary = new BoggleDictionary(dictionary);
         
+    	/*
         for (String word : dictionary) {
             this.dictionary.put(word, word.length());
         }
+        */
     }
-
-
     
     /**
      * Return all the Die reacheble from a Die at row, col.
@@ -95,10 +95,8 @@ public class BoggleSolver {
             }
         }
         
-        return dice;
-        
+        return dice;    
     }
-    
     
     /**
      * Returns the set of all valid words in the given Boggle board, as an Iterable.
@@ -144,12 +142,12 @@ public class BoggleSolver {
     	// END DEBUG
     	
     	// If it's a valid word.
-    	if (path.length() > 2 && dictionary.contains(path)) {
+    	if (path.length() > 2 && inDictionary(path)) {
     		validWords.add(path);
     	}
     	
     	// If the path so far is a prefix to a word in the dictionary
-    	if (dictionary.keysWithPrefix(path).iterator().hasNext()) {
+    	if (dictionary.containsPrefix(path)) {
     		// 	Mark the die at (row, col) as visited
     		marked[row][col] = true;
     	
