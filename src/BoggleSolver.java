@@ -1,5 +1,5 @@
 /**
- * The immutable data type BoggleSover finds all valid words in give Boggle 
+ * The immutable data type BoggleSover finds all valid words in given Boggle 
  * board, using a given dictionary. 
  * @author Brian Drake
  *
@@ -42,14 +42,7 @@ public class BoggleSolver {
      * @param dictionary
      */
     public BoggleSolver(String[] dictionary) {
-    	// this.dictionary = new TST<>();
     	this.dictionary = new BoggleDictionary(dictionary);
-        
-    	/*
-        for (String word : dictionary) {
-            this.dictionary.put(word, word.length());
-        }
-        */
     }
     
     /**
@@ -207,6 +200,12 @@ public class BoggleSolver {
         BoggleBoard board = new BoggleBoard(args[1]);
         int score = 0;
         
+        // Testing scoreOf
+        String[] testScoreWords = {"HELP", "MOM", "AT"};
+        for (String word : testScoreWords) {
+            System.out.println("solver.scoreOf(" + word + ") = " + solver.scoreOf(word));
+        }
+        
         /*
         String[] testWords = {"HELP", "MOM", "TACO", "MONKEYS"};
         for (String word : testWords) {
@@ -238,11 +237,13 @@ public class BoggleSolver {
         }
         */      
         
+        
         for (String word : solver.getAllValidWords(board)) {
             System.out.println(word);
             score += solver.scoreOf(word);
         }
         System.out.println("\nScore = " + score);
+        
         
         // solver.getAllValidWords(new BoggleBoard(5,5));
     }

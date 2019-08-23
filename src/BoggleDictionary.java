@@ -7,41 +7,40 @@
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.TST;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class BoggleDictionary {
-	// private final TST<Integer> dictionary;
-	// private final TST<Integer>[][] dictionary;
-	private ArrayList<ArrayList<TST<Integer>>> dictionary;
-	
+    private final HashMap<String, TST<Integer>> dictionary;
+
 	/**
-	 * Constructor
-	 * @param dictionary
+	 * Constructor - loads all Strings in the array words into the dictionary.
+	 * @param words an array of all Strings to be added to dictionary.
 	 */
 	public BoggleDictionary(String[] words) {
-		// this.dictionary = new TST<>();
-		dictionary = new ArrayList<>();
-		for (int i = 0; i < 26; i++) {
-			dictionary.add(i, new ArrayList<>());
-		}
-				
+	    dictionary = new HashMap<>();
+	    
         for (String word : words) {
-        	System.out.print("\nword = " + word + "  ");
-            // this.dictionary.put(word, word.length());
-        	
+        	// BEGIN DEBUG
+            // System.out.print("\nword = " + word + "  ");
+        	// END DEBUG
+            
         	if (word.length() > 2) {
-        		System.out.print("... Adding TST<Integer> at [" + ((int)word.charAt(0)-65) + "][" + ((int)word.charAt(1)-65) + "] " );
-        		try {
-        			System.out.print("Inside try... ");
-        		    dictionary.get((int)(word.charAt(0)-65)).get((int)(word.charAt(1)-65)).put(word.substring(2), word.length()-2);
-        		    System.out.print("Worked within try ...");
-        		}
-        		finally {
-        			System.out.print("Inside finally ... ");
-        			dictionary.get((int)(word.charAt(0)-65)).add((int)(word.charAt(1)-65), new TST<Integer>());
-        		    dictionary.get((int)(word.charAt(0)-65)).get((int)(word.charAt(1)-65)).put(word.substring(2), word.length()-2);
-        		    System.out.print("Worked within finally ...");
-        		}
+        	    String key = String.valueOf(word.charAt(0)) + String.valueOf(word.charAt(1));
+        	    // BEGIN DEBUG
+        	    // System.out.print("key = " + key);
+        	    // END DEBUG
+        	    
+        	    // If the key doesn't already exist
+        	    if (!dictionary.containsKey(key)) {
+        	        // Create the TST for this key
+        	        dictionary.put(key, new TST<Integer>());
+        	    }
+        	    
+        	    // BEGIN DEBUG
+        	    // System.out.print("  Adding " + word.substring(2) + " to TST ...");
+        	    // END DEBUG
+        	    
+        	    dictionary.get(key).put(word.substring(2), word.length());
         	}
         }
 	}
@@ -52,8 +51,11 @@ public class BoggleDictionary {
 	 * @return True if the dictionary contains the word, else false.
 	 */
 	public boolean contains(String word) {
-		// return dictionary.contains(word);
-		return false;
+	    if (word.length() < 2) { return false; }
+	    if (word.length() == 2) { return dictionary.containsKey(word); } 
+	    String key = String.valueOf(word.charAt(0)) + String.valueOf(word.charAt(1));
+	    if (!dictionary.containsKey(key)) { return false; }
+	    return dictionary.get(key).contains(word.substring(2));
 	}
 	
 	/**
@@ -63,8 +65,23 @@ public class BoggleDictionary {
 	 * 	the prefix, else false.
 	 */
 	public boolean containsPrefix(String prefix) {
-		// return dictionary.keysWithPrefix(prefix).iterator().hasNext();
-		return false;
+	    if (prefix.length() == 1) {
+	        char[] c = {prefix.charAt(0), 'A'};
+	        while (c[1] <= 'Z') {
+	            if (dictionary.containsKey(String.valueOf(c))) { return true; }
+	            c[1]++;
+	        }
+	        return false;
+	    }
+	    if (prefix.length() == 2) {
+	        return dictionary.containsKey(prefix);
+	    }
+	    
+	    else {
+	        String key = String.valueOf(prefix.charAt(0)) + String.valueOf(prefix.charAt(1));
+	        if (!dictionary.containsKey(key)) { return false; }
+	        return dictionary.get(key).keysWithPrefix(prefix.substring(2)).iterator().hasNext();
+	    }
 		
 	}
 	
@@ -74,12 +91,13 @@ public class BoggleDictionary {
 	     BoggleDictionary testDict = new BoggleDictionary(allWords); 
 
 	     // Test the contains method
+	     System.out.println("Testing the contains method...");
 	     String[] testWords = {"HELP", "MOM", "TACO", "MONKEYS"};	     	     
 	     for (String word : testWords) {
 	    	 System.out.println("testDict.contains(" + word + ") = " + testDict.contains(word));
 	     }
 	        
-	     String[] testPrefix = {"MONKEYS", "MONKEY", "MONK", "MONKA", "TAC", "MOM"};
+	     String[] testPrefix = {"MONKEYS", "MONKEY", "MONK", "MONKA", "TAC", "MOM", "M", "T", "MO", "TA"};
 	     for (String prefix : testPrefix) {
 	         System.out.println("testDict.containsPrefix(" + prefix + ") = " + testDict.containsPrefix(prefix));
 	     }
