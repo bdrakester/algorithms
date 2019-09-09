@@ -167,7 +167,6 @@ public class Board {
      * @return
      */
     public Iterable<Board> neighbors() {
-        // TODO
     	/*
     	 * Add all potential neighbor boards to a queue and return that.
     	 */
