@@ -115,6 +115,7 @@ public class BurrowsWheeler {
         // Construct next array
         // TODO - more efficient way?  
         //        Perhaps populate next while doing key-index count?
+        //        Or in previous loops creating an indexOf thing
         boolean[] addedYet = new boolean[N];  
         
         for (int i = 0; i < N; i++) {
@@ -150,11 +151,11 @@ public class BurrowsWheeler {
 
         
     }
-
+    
     /**
-     * if args[0] is "-", apply Burrows-Wheeler transform
+     * if args[0] is "-", apply Burrows-Wheeler transform.
      * if args[0] is "+", apply Burrows-Wheeler inverse transform
-     * @param args
+     * @param args command line arguments.
      */
     public static void main(String[] args) {
         
