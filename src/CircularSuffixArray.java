@@ -1,7 +1,7 @@
 /**
  * The CircularSuffixArray class. 
  * 
- * "To efficiently implement the key component in the Burrows–Wheeler 
+ * "To efficiently implement the key component in the Burrows Wheeler 
  * transform, you will use a fundamental data structure known as the 
  * circular suffix array, which describes the abstraction of a sorted 
  * array of the n circular suffixes of a string of length n."
@@ -17,16 +17,16 @@ import java.util.Arrays;
 import edu.princeton.cs.algs4.In;
 
 public class CircularSuffixArray {
-    final private String data;  // The original string
-    private CircularSuffix[] suffixes;  // Array of circular suffixes
+    private final String data;  // The original string
+    private final CircularSuffix[] suffixes;  // Array of circular suffixes
     
     /**
      * The inner class CircularSuffix represents a suffix
      * of String data by storing the index of the 
      * first character in that suffix.
      */
-    private class CircularSuffix implements Comparable<CircularSuffix>{
-        final private int first; // Index of the first character in suffix.
+    private class CircularSuffix implements Comparable<CircularSuffix> {
+        private final int first; // Index of the first character in suffix.
         
         /**
          * Constructor
@@ -68,7 +68,7 @@ public class CircularSuffixArray {
         public String toString() {
             StringBuilder result = new StringBuilder(data.length());
             for (int i = 0; i < data.length(); i++) {
-                result.append( data.charAt( (first + i) % data.length() ) );
+                result.append(data.charAt((first + i) % data.length()));
             }
             return result.toString();
         }

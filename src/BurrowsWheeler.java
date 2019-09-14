@@ -78,7 +78,7 @@ public class BurrowsWheeler {
             // BEGIN DEBUG
             // System.out.println("t[" + i + "] = " + t.charAt(i) + "\t(int)t[i] = " + (int)t.charAt(i));
             // END DEBUG
-            count[(int)t.charAt(i)+1]++;
+            count[(int) t.charAt(i)+1]++;
         }
         
         // BEGIN DEBUG
@@ -103,7 +103,7 @@ public class BurrowsWheeler {
         // Access cumulates using key as index to move items, 
         // after loop f contains first column of sorted suffixes.
         for (int i = 0; i < N; i++) {
-            f[count[(int)t.charAt(i)]++] = t.charAt(i);
+            f[count[(int) t.charAt(i)]++] = t.charAt(i);
         }
         
         // BEGIN DEBUG
@@ -121,7 +121,7 @@ public class BurrowsWheeler {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if (!addedYet[j]) {
-                    if (t.charAt(j) == f[i] ) {
+                    if (t.charAt(j) == f[i]) {
                         next[i] = j;
                         addedYet[j] = true;
                         break;
@@ -159,10 +159,10 @@ public class BurrowsWheeler {
      */
     public static void main(String[] args) {
         
-        if (args[0].contentEquals("-")) {
+        if (args[0].equals("-")) {
             transform();
         }
-        else if (args[0].contentEquals("+")) {
+        else if (args[0].equals("+")) {
             inverseTransform();
         }
     }
